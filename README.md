@@ -2,22 +2,22 @@
 
 ### Example-Settings:
 
-{
-    "sql1":
-    {
-        "active":true,
-        "type":"sqllite",
-        "filename":"sql1.db"
-    },
-    "sql2":
-    {
-        "active":true,
-        "type":"sqllite",
-        "filename":"sql2.db"
-    },
-    "program": "tvseries_dbprint",
-    "detail_level":1
-}
+        {
+            "sql1":
+            {
+                "active":true,
+                "type":"sqllite",
+                "filename":"sql1.db"
+            },
+            "sql2":
+            {
+                "active":true,
+                "type":"sqllite",
+                "filename":"sql2.db"
+            },
+            "program": "tvseries_dbprint",
+            "detail_level":1
+        }
 
 ## Setting-up
 
