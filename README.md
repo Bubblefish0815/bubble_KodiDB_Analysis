@@ -1,4 +1,4 @@
-# bubble_KodiTVDB
+# bubble_KodiDB_Analysis
 
 ### Example-Settings:
 
