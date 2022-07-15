@@ -1,15 +1,12 @@
 {
-  "dependencies": {
-    "mysql": "^2.18.1",
-    "sqlite3": "^5.0.9"
-  },
+  "name": "bubble_koditvdb",
+  "version": "1.0.1",
+  "description": "Setting the Config-File:",
+  "main": "server.js",
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "name": "bubble_koditvdb",
-  "description": "bubble_KodiTVDB",
-  "version": "1.0.0",
-  "main": "server.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Bubblefish0815/bubble_KodiTVDB.git"
@@ -19,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/Bubblefish0815/bubble_KodiTVDB/issues"
   },
-  "homepage": "https://github.com/Bubblefish0815/bubble_KodiTVDB#readme"
+  "homepage": "https://github.com/Bubblefish0815/bubble_KodiTVDB#readme",
+  "dependencies": {
+    "mysql": "^2.18.1",
+    "sqlite3": "^5.0.9"
+  }
 }

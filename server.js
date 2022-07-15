@@ -10,218 +10,290 @@ async function start()
     var sql1 = new hometvdbmodule.hometvdbclass(config.sql1);
     await sql1.connect().then(function(res){console.log(res.answer)})
     
-    if(config.sql2.active == true)
-    {
-        var sql2 = new hometvdbmodule.hometvdbclass(config.sql2);
+    var sql2 = new hometvdbmodule.hometvdbclass(config.sql2);
+    if(sql2.active == true)
+    {  
         await sql2.connect().then(function(res){console.log(res.answer)})
     }
     
-    var programname = config.program.join("_")
-    if(programname == "tvseries_comp")
+    let program = commands[config.program]
+    if (commands[config.program]) 
     {
-        tvseries_comp(sql1,sql2);
+        var output = null;
+        if(program.requirements.sql1)
+        {
+            if(sql1.active)
+            {
+                if(program.requirements.sql2)
+                {
+                    if(sql2.active)
+                    {
+                        output = await program.process(sql1,sql2);
+                    }
+                    else
+                    {
+                        console.log("SQL2 required, but not active");
+                        process.abort();
+                    }
+                }
+                else
+                {
+                    output = await program.process(sql1);
+                }
+            }
+            else
+            {
+                console.log("SQL1 required, but not active");
+                process.abort();
+            }
+
+        }
+        else
+        {
+            console.log("SQL1.requirement not true, doesnt make sense");
+            process.abort();
+        }
+        await write_to_disk(output).then(function(res){console.log(res)})
     }
-    else if(programname == "movies_comp")
+    else
     {
-        movies_comp(sql1,sql2);
-    }
-    else if(programname == "tvseries_doubleprevent")
-    {
-        tvseries_doubleprevent(sql1);
-    }
-    else if(programname == "tvseries_dbprint")
-    {
-        tvseries_dbprint(sql1)
+        console.log("Program not found!")
+        process.abort();
     }
 }
 start()
 
-async function tvseries_comp(sql1,sql2)
+var commands = 
 {
-    var series1 = await sql1.bubble_tvshowdetails();
-    console.log("Bubble_TVShowDetails loaded for SQL1");
-    var series2 = await sql2.bubble_tvshowdetails();
-    console.log("Bubble_TVShowDetails loaded for SQL2");
-    
-    var show_differences = [];
-    var episoden_differences = [];
-
-
-    for(let i=0;i< series2.length;i++)
+    "tvseries_comp":
     {
-        let diff = series1.filter(r => r.c00 === series2[i].c00)
-        if(!diff.length)
+        requirements:{"sql1":true,"sql2":true},
+        process:async function(sql1,sql2,callback)
         {
-            show_differences.push({"show":series2[i].c00,"not_found_in":"sql1"});
-        }
-        else
-        {
-            if(series2[i].bubble_episoden.length !== diff[0].bubble_episoden.length)
-            {
-                episoden_differences.push({"show":series2[i].c00,"episoden_amount_sql1":diff[0].bubble_episoden.length,"episoden_amount_sql2":series2[i].bubble_episoden.length});
-            }
-        }
-    }
-    for(let i=0;i< series1.length;i++)
-    {
-        let diff = series2.filter(r => r.c00 === series1[i].c00)
-        if(!diff.length)
-        {
-            show_differences.push({"show":series2[i].c00,"not_found_in":"sql2"});
-        }
-    }
-
-    var ausgabe = "";
-    if(config.detail_level == 1)
-    {
-        for(let i=0;i< show_differences.length;i++)
-        {
-            ausgabe += `${show_differences[i].show}  ;;  ${show_differences[i].not_found_in}  ;;\n`
-        }
-    }
-    else if(config.detail_level == 2)
-    {
-        for(let i=0;i< show_differences.length;i++)
-        {
-            ausgabe += `${show_differences[i].show}  ;;  ${show_differences[i].not_found_in}  ;;\n`
-        }
-        ausgabe += "####################################################\n"
-        for(let i=0;i< episoden_differences.length;i++)
-        {
-            ausgabe += `${episoden_differences[i].show}  ;;  SQL1:${episoden_differences[i].episoden_amount_sql1}  ;; SQL2:${episoden_differences[i].episoden_amount_sql2}  ;;\n`
-        }
-    }
-    else
-    {
-        console.log("Unknown Detail_Level!")
-        process.abort();
-    }
-
-    await write_to_disk(ausgabe).then(function(res){console.log(res)})
-
-    
-
-
-}
-
-async function movies_comp(sql1,sql2)
-{
-    var movies1 = await sql1.databasequerryhandler("select * from movie");
-    console.log("Movies loaded for SQL1");
-    var movies2 = await sql2.databasequerryhandler("select * from movie");
-    console.log("Movies loaded for SQL2");
-
-    var movies_differences = [];
-    for(let i=0;i< movies2.length;i++)
-    {
-        let diff = movies1.filter(r => r.c00 === movies2[i].c00)
-        if(!diff.length)
-        {
-            movies_differences.push({"movie":movies2[i].c00,"not_found_in":"sql1"});
-        }
-    }
-    for(let i=0;i< movies1.length;i++)
-    {
-        let diff = movies2.filter(r => r.c00 === movies1[i].c00)
-        if(!diff.length)
-        {
-            movies_differences.push({"movie":movies1[i].c00,"not_found_in":"sql2"});
-        }
-    }
-
-    var ausgabe = "";
-    if(config.detail_level == 1)
-    {
-        for(let i=0;i< movies_differences.length;i++)
-        {
-            ausgabe += `${movies_differences[i].movie}  ;;  ${movies_differences[i].not_found_in}  ;;\n`
-        }
-    }
-    else
-    {
-        console.log("Unknown Detail_Level!")
-        process.abort();
-    }
-
-    await write_to_disk(ausgabe).then(function(res){console.log(res)})
-
-}
-
-async function tvseries_doubleprevent(sql1) //UNGETESTET
-{
-    var series1 = await sql1.bubble_tvshowdetails();
-    console.log("Bubble_TVShowDetails loaded for SQL1");
-
-    var doubles = []
-    for(let i=0;i<series1.length;i++) 
-    {
-        let double_prevention = series1.filter(r => r.c00 === series1[i].c00)
-        if(!double_prevention.length)
-        {
-            let alreadyinlist = doubles.filter(r => r.c00 === double_prevention[0].c00)
-            if(!alreadyinlist.length)
-            {
-                doubles.push(double_prevention[0])
-            }
-        }
-    }
-
-    var ausgabe = "";
-    if(config.detail_level == 1)
-    {
-        for(let i=0;i< doubles.length;i++)
-        {
-            ausgabe += `${doubles[i].c00}  ;;\n`
-        }
-    }
-    else
-    {
-        console.log("Unknown Detail_Level!")
-        process.abort();
-    }
-
-    await write_to_disk(ausgabe).then(function(res){console.log(res)})
-
-
-
-}
-
-async function tvseries_dbprint(sql1)
-{
-    var series1 = await sql1.bubble_tvshowdetails();
-    console.log("Bubble_TVShowDetails loaded for SQL1");
-
-    ///***///Ausgabe///***///
-    var ausgabe = ""
-    if(config.detail_level == 1)
-    {
-        for(let i=0;i<series1.length;i++)
-        {
-            ausgabe += `${series1[i].c00} ;; ${series1[i].bubble_staffeldetails.length} Staffeln ;; ${series1[i].bubble_episoden.length} Folgen ;;\n`
+            return new Promise(async (resolve, reject) => {
+            var series1 = await sql1.bubble_tvshowdetails();
+            console.log("Bubble_TVShowDetails loaded for SQL1");
+            var series2 = await sql2.bubble_tvshowdetails();
+            console.log("Bubble_TVShowDetails loaded for SQL2");
             
-        }
-    }
-    else if(config.detail_level == 2)
-    {
-        for(let i=0;i<series1.length;i++)
-        {
-            ausgabe += `${series1[i].c00} ;; ${series1[i].bubble_staffeldetails.length} Staffeln ;;`
-            for(let u=0;u < series1[i].bubble_staffeldetails.length;u++)
+            var show_differences = [];
+            var episoden_differences = [];
+        
+        
+            for(let i=0;i< series2.length;i++)
             {
-                let test = series1[i].bubble_staffeldetails[u].bubble_episodendetails
-                let test2 = series1[i].bubble_staffeldetails[u].bubble_episodendetails.length
-                ausgabe += ` S${series1[i].bubble_staffeldetails[u].season}:${series1[i].bubble_staffeldetails[u].bubble_episodendetails.length} `
+                let diff = series1.filter(r => r.c00 === series2[i].c00)
+                if(!diff.length)
+                {
+                    show_differences.push({"show":series2[i].c00,"not_found_in":"sql1"});
+                }
+                else
+                {
+                    if(series2[i].bubble_episoden.length !== diff[0].bubble_episoden.length)
+                    {
+                        episoden_differences.push({"show":series2[i].c00,"episoden_amount_sql1":diff[0].bubble_episoden.length,"episoden_amount_sql2":series2[i].bubble_episoden.length});
+                    }
+                }
             }
-            ausgabe +=`;; ${series1[i].bubble_episoden.length} Folgen ;;\n`
-            
-        }
-    }
-    else if(config.detail_level == 3)
-    {
-        ausgabe = JSON.stringify(series1)
-    }
+            for(let i=0;i< series1.length;i++)
+            {
+                let diff = series2.filter(r => r.c00 === series1[i].c00)
+                if(!diff.length)
+                {
+                    show_differences.push({"show":series2[i].c00,"not_found_in":"sql2"});
+                }
+            }
+        
+            var ausgabe = "";
+            if(config.detail_level == 1)
+            {
+                for(let i=0;i< show_differences.length;i++)
+                {
+                    ausgabe += `${show_differences[i].show}  ;;  ${show_differences[i].not_found_in}  ;;\n`
+                }
+            }
+            else if(config.detail_level == 2)
+            {
+                for(let i=0;i< show_differences.length;i++)
+                {
+                    ausgabe += `${show_differences[i].show}  ;;  ${show_differences[i].not_found_in}  ;;\n`
+                }
+                ausgabe += "####################################################\n"
+                for(let i=0;i< episoden_differences.length;i++)
+                {
+                    ausgabe += `${episoden_differences[i].show}  ;;  SQL1:${episoden_differences[i].episoden_amount_sql1}  ;; SQL2:${episoden_differences[i].episoden_amount_sql2}  ;;\n`
+                }
+            }
+            else
+            {
+                console.log("Unknown Detail_Level!")
+                process.abort();
+            }
 
-    await write_to_disk(ausgabe).then(function(res){console.log(res)})
+
+            if (callback && typeof callback == 'function') {
+                await callback("", ausgabe);
+                resolve();
+            }
+            else {
+                resolve(ausgabe);
+            }
+        });
+        }
+    },
+    "movie_comp":
+    {
+        requirements:{"sql1":true,"sql2":true},
+        process:async function(sql1,sql2,callback)
+        {
+            return new Promise(async (resolve, reject) => {
+            var movies1 = await sql1.databasequerryhandler("select * from movie");
+            console.log("Movies loaded for SQL1");
+            var movies2 = await sql2.databasequerryhandler("select * from movie");
+            console.log("Movies loaded for SQL2");
+        
+            var movies_differences = [];
+            for(let i=0;i< movies2.length;i++)
+            {
+                let diff = movies1.filter(r => r.c00 === movies2[i].c00)
+                if(!diff.length)
+                {
+                    movies_differences.push({"movie":movies2[i].c00,"not_found_in":"sql1"});
+                }
+            }
+            for(let i=0;i< movies1.length;i++)
+            {
+                let diff = movies2.filter(r => r.c00 === movies1[i].c00)
+                if(!diff.length)
+                {
+                    movies_differences.push({"movie":movies1[i].c00,"not_found_in":"sql2"});
+                }
+            }
+        
+            var ausgabe = "";
+            if(config.detail_level == 1)
+            {
+                for(let i=0;i< movies_differences.length;i++)
+                {
+                    ausgabe += `${movies_differences[i].movie}  ;;  ${movies_differences[i].not_found_in}  ;;\n`
+                }
+            }
+            else
+            {
+                console.log("Unknown Detail_Level!")
+                process.abort();
+            }
+
+            if (callback && typeof callback == 'function') {
+                await callback("", ausgabe);
+                resolve();
+            }
+            else {
+                resolve(ausgabe);
+            }
+        });
+        }
+    },
+    "tvseries_doubleprevent":
+    {
+        requirements:{"sql1":true,"sql2":false},
+        process:async function(sql1,callback)
+        {
+            return new Promise(async (resolve, reject) => {
+            var series1 = await sql1.bubble_tvshowdetails();
+            console.log("Bubble_TVShowDetails loaded for SQL1");
+        
+            var doubles = []
+            for(let i=0;i<series1.length;i++) 
+            {
+                let double_prevention = series1.filter(r => r.c00 === series1[i].c00)
+                if(!double_prevention.length)
+                {
+                    let alreadyinlist = doubles.filter(r => r.c00 === double_prevention[0].c00)
+                    if(!alreadyinlist.length)
+                    {
+                        doubles.push(double_prevention[0])
+                    }
+                }
+            }
+        
+            var ausgabe = "";
+            if(config.detail_level == 1)
+            {
+                for(let i=0;i< doubles.length;i++)
+                {
+                    ausgabe += `${doubles[i].c00}  ;;\n`
+                }
+            }
+            else
+            {
+                console.log("Unknown Detail_Level!")
+                process.abort();
+            }
+
+            if (callback && typeof callback == 'function') {
+                await callback("", ausgabe);
+                resolve();
+            }
+            else {
+                resolve(ausgabe);
+            }
+        });
+
+        }
+    },
+    "tvseries_dbprint":
+    {
+        requirements:{"sql1":true,"sql2":false},
+        process:async function(sql1,callback)
+        {
+            return new Promise(async (resolve, reject) => {
+            var series1 = await sql1.bubble_tvshowdetails();
+            console.log("Bubble_TVShowDetails loaded for SQL1");
+        
+            ///***///Ausgabe///***///
+            var ausgabe = ""
+            if(config.detail_level == 1)
+            {
+                for(let i=0;i<series1.length;i++)
+                {
+                    ausgabe += `${series1[i].c00} ;; ${series1[i].bubble_staffeldetails.length} Staffeln ;; ${series1[i].bubble_episoden.length} Folgen ;;\n`
+                    
+                }
+            }
+            else if(config.detail_level == 2)
+            {
+                for(let i=0;i<series1.length;i++)
+                {
+                    ausgabe += `${series1[i].c00} ;; ${series1[i].bubble_staffeldetails.length} Staffeln ;;`
+                    for(let u=0;u < series1[i].bubble_staffeldetails.length;u++)
+                    {
+                        let test = series1[i].bubble_staffeldetails[u].bubble_episodendetails
+                        let test2 = series1[i].bubble_staffeldetails[u].bubble_episodendetails.length
+                        ausgabe += ` S${series1[i].bubble_staffeldetails[u].season}:${series1[i].bubble_staffeldetails[u].bubble_episodendetails.length} `
+                    }
+                    ausgabe +=`;; ${series1[i].bubble_episoden.length} Folgen ;;\n`
+                    
+                }
+            }
+            else if(config.detail_level == 3)
+            {
+                ausgabe = JSON.stringify(series1)
+            }
+
+            if (callback && typeof callback == 'function') {
+                await callback("", ausgabe);
+                resolve();
+            }
+            else {
+                resolve(ausgabe);
+            }
+        });
+        
+        }
+
+        
+    }
 
 }
 
