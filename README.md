@@ -1,6 +1,6 @@
 # bubble_KodiTVDB
 
-## Example-Settings:
+### Example-Settings:
 
 {
     "sql1":
@@ -21,7 +21,7 @@
     "detail_level":1
 }
 
-## Setting-UP
+## Setting-up
 
 ### SQL-Settings
 
@@ -33,7 +33,7 @@
             "filename":""
         },
 
-        -----SQL-LITE-----
+        -----MYSQL-----
         "sql2":
         {   
             "active":true,
