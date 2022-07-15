@@ -1,8 +1,7 @@
 # bubble_KodiTVDB
 
-Setting the Config-File:
+## Example-Settings:
 
-#######Example-Settings:#######
 {
     "sql1":
     {
@@ -22,8 +21,10 @@ Setting the Config-File:
     "detail_level":1
 }
 
-##############Setting-UP##############
-#######SQL-Settings#######
+## Setting-UP
+
+### SQL-Settings
+
         -----SQL-LITE-----
         "sql1":
         {
@@ -43,7 +44,7 @@ Setting the Config-File:
         },
     
 
-#####Programs#####
+### Programs
 
         -----Comparing Movies-----(sql1 & sql2)
         "program": movies_comp
