@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "mysql": "^2.18.1",
+    "sqlite3": "^5.0.9"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "bubble_koditvdb",
+  "description": "bubble_KodiTVDB",
+  "version": "1.0.0",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bubblefish0815/bubble_KodiTVDB.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Bubblefish0815/bubble_KodiTVDB/issues"
+  },
+  "homepage": "https://github.com/Bubblefish0815/bubble_KodiTVDB#readme"
+}
