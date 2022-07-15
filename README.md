@@ -21,7 +21,7 @@
 
 ## Setting-up
 
-### SQL-Settings
+### SQL-Settings:
 
         -----SQL-LITE-----
         "sql1":
@@ -42,7 +42,7 @@
         },
     
 
-### Programs
+### Programs:
 
         -----Comparing Movies-----(sql1 & sql2)
         "program": movies_comp
