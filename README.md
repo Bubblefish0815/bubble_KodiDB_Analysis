@@ -15,9 +15,7 @@
         "type":"sqllite",
         "filename":"sql2.db"
     },
-
     "program": "tvseries_dbprint",
-
     "detail_level":1
 }
 
