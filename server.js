@@ -100,9 +100,19 @@ var commands =
                 let diff = series2.filter(r => r.c00 === series1[i].c00)
                 if(!diff.length)
                 {
-                    show_differences.push({"show":series2[i].c00,"not_found_in":"sql2"});
+                    show_differences.push({"show":series1[i].c00,"not_found_in":"sql2"});
+                }
+                else
+                {
+                    if(series1[i].bubble_episoden.length !== diff[0].bubble_episoden.length)
+                    {
+                        episoden_differences.push({"show":series1[i].c00,"episoden_amount_sql2":diff[0].bubble_episoden.length,"episoden_amount_sql1":series1[i].bubble_episoden.length});
+                    }
                 }
             }
+            
+
+
         
             var ausgabe = "";
             if(config.detail_level == 1)
@@ -119,9 +129,20 @@ var commands =
                     ausgabe += `${show_differences[i].show}  ;;  ${show_differences[i].not_found_in}  ;;\n`
                 }
                 ausgabe += "####################################################\n"
+
+                var episoden_differences_without_doubles = []
                 for(let i=0;i< episoden_differences.length;i++)
                 {
-                    ausgabe += `${episoden_differences[i].show}  ;;  SQL1:${episoden_differences[i].episoden_amount_sql1}  ;; SQL2:${episoden_differences[i].episoden_amount_sql2}  ;;\n`
+                    let doubles = episoden_differences_without_doubles.filter(r => r.show === episoden_differences[i].show)
+                    if(!doubles.length)
+                    {
+                        episoden_differences_without_doubles.push(episoden_differences[i])
+                    }
+
+                }
+                for(let i=0;i< episoden_differences_without_doubles.length;i++)
+                {
+                    ausgabe += `${episoden_differences_without_doubles[i].show}  ;;  SQL1:${episoden_differences_without_doubles[i].episoden_amount_sql1}  ;; SQL2:${episoden_differences_without_doubles[i].episoden_amount_sql2}  ;;\n`
                 }
             }
             else
@@ -207,7 +228,7 @@ var commands =
             for(let i=0;i<series1.length;i++) 
             {
                 let double_prevention = series1.filter(r => r.c00 === series1[i].c00)
-                if(!double_prevention.length)
+                if(double_prevention.length > 1)
                 {
                     let alreadyinlist = doubles.filter(r => r.c00 === double_prevention[0].c00)
                     if(!alreadyinlist.length)
