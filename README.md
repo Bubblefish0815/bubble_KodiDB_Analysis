@@ -21,6 +21,8 @@
 
 ## Setting-up
 
+Create a "config.json" with the parts shown in the example
+
 ### SQL-Settings:
 
         -----SQL-LITE-----
