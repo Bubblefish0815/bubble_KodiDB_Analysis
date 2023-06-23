@@ -162,7 +162,7 @@ var commands =
         });
         }
     },
-    "movie_comp":
+    "movies_comp":
     {
         requirements:{"sql1":true,"sql2":true},
         process:async function(sql1,sql2,callback)
