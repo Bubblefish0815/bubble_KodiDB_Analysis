@@ -11,6 +11,7 @@ class hometvdbclass {
         this.username = credentials.username;
         this.password = credentials.password;
         this.port = credentials.port;
+        this.databasename = credentials.databasename;
 
 
         this.con=null;
@@ -56,7 +57,7 @@ class hometvdbclass {
                     }
                     else
                     {
-                        that.databasequerryhandler("use MyVideos119",async function (err, res)
+                        that.databasequerryhandler(`use ${that.databasename}`,async function (err, res)
                         {
                             if (err) {
                                 console.error(`Error connecting to MYSQL-Server ${that.host} - ERROR:${err}`);
@@ -131,7 +132,7 @@ class hometvdbclass {
         });
     }
 
-    bubble_tvshowdetails(callback)
+    bubble_tvshowdetails(callback) //Gets serien, staffeln and episoden from the file / server and puts them into one array
     {
         var that = this;
         return new Promise(async (resolve, reject) => {

@@ -36,11 +36,14 @@ Create a "config.json" with the parts shown in the example
         -----MYSQL-----
         "sql2":
         {   
-            "active":true,
-            "type":"mysql",
-            "username":"",
-            "password":"",
-            "port":3306
+			"active":true,
+			"type":"mysql",
+			"host":"",
+			"port":3306,
+			"username":"",
+			"password":"",
+			"databasename":""
+			
         },
     
 
